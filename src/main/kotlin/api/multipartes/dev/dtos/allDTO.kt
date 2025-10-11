@@ -61,3 +61,50 @@ data class PartResponse(
     val price: BigDecimal,
     val quantity: Byte
 )
+
+// ========== BRANDS DTOs ==========
+data class CreateBrandRequest(
+    val name: String
+)
+
+data class UpdateBrandRequest(
+    val name: String
+)
+
+data class BrandResponse(
+    val id: Int,
+    val name: String
+)
+
+// ========== MODELS DTOs ==========
+data class CreateModelRequest(
+    val brandId: Int,
+    val serialNumber: String?,
+    val name: String,
+    val year: Int?,
+    val transmission: String?, // "AUTOMATIC" o "STANDARD"
+    val engine: String,
+    val vehicleClass: String
+)
+
+data class UpdateModelRequest(
+    val brandId: Int,
+    val serialNumber: String?,
+    val name: String,
+    val year: Int?,
+    val transmission: String?, // "AUTOMATIC" o "STANDARD"
+    val engine: String,
+    val vehicleClass: String
+)
+
+data class ModelResponse(
+    val id: Int,
+    val brandId: Int,
+    val brandName: String,
+    val serialNumber: String?,
+    val name: String,
+    val year: Int?,
+    val transmission: String?,
+    val engine: String,
+    val vehicleClass: String
+)

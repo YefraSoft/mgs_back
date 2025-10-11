@@ -27,6 +27,8 @@ cache:
   cache-names:
     - parts
     - sales
+    - brands
+    - models
     - tickets
 
 jwt:

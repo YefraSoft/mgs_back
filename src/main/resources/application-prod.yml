@@ -26,6 +26,9 @@ cache:
   cache-names:
     - parts
     - sales
+    - brands
+    - models
+    - tickets
 
 jwt:
   secret: ${JWT_SECRET}
