@@ -5,7 +5,7 @@ import jakarta.persistence.*
 
 @Entity
 @Table(name = "roles")
-data class Role(
+data class UserRole(
     @Id
     val id: Byte,
 

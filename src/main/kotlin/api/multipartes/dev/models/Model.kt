@@ -1,7 +1,8 @@
 package api.multipartes.dev.models
 
+import api.multipartes.dev.enums.TransmissionType
 import jakarta.persistence.*
-import java.time.LocalDateTime
+
 
 @Entity
 @Table(name = "models")
@@ -10,15 +11,24 @@ data class Model(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null,
 
-    @Column(unique = true)
+    @ManyToOne
+    @JoinColumn(name = "brand_id", nullable = false)
+    val brand: VehicleBrands,
+
+    @Column(name = "serial_number")
+    val serialNumber: String? = null,
+
+    @Column(nullable = false)
     val name: String,
 
-    val year: String? = null,
+    val year: Int? = null,
 
-    @ManyToOne
-    @JoinColumn(name = "brand_id")
-    val brand: Brand? = null,
+    @Enumerated(EnumType.STRING)
+    val transmission: TransmissionType? = null,
 
-    @Column(name = "created_at", updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    @Column(nullable = false)
+    val engine: String,
+
+    @Column(name = "vehicle_class", nullable = false)
+    val vehicleClass: String
 )

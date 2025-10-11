@@ -1,7 +1,6 @@
 package api.multipartes.dev.models
 
 import jakarta.persistence.*
-import java.time.LocalDateTime
 
 @Entity
 @Table(name = "users")
@@ -10,17 +9,16 @@ data class User(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null,
 
+    @Column(nullable = false, length = 50)
     val name: String,
 
-    @Column(unique = true, nullable = false)
-    val email: String,
+    @Column(unique = true, nullable = false, length = 50)
+    val username: String,
 
+    @Column(nullable = false)
     val password: String,
 
     @ManyToOne
-    @JoinColumn(name = "role_id", nullable = false)
-    val role: Role,
-
-    @Column(name = "created_at", updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    @JoinColumn(name = "role_id")
+    val role: UserRole
 )

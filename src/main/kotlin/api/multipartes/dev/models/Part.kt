@@ -1,28 +1,33 @@
 package api.multipartes.dev.models
 
+import api.multipartes.dev.enums.SideType
 import jakarta.persistence.*
 import java.math.BigDecimal
-import java.time.LocalDateTime
 
 @Entity
 @Table(name = "parts")
 data class Part(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int,
+    val id: Int? = null,
 
-    val stock: Byte? = null,
+    val code: String? = null,
+
+    @Column(nullable = false)
     val name: String,
-    val feature: String? = null,
-    val state: String? = null,
-    val side: String? = null,
-    val position: Byte? = null,
-    val price: BigDecimal,
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    val side: SideType,
 
     @ManyToOne
-    @JoinColumn(name = "model_id")
-    val model: Model? = null,
+    @JoinColumn(name = "part_category_id", nullable = false)
+    val partCategory: PartCategory,
 
-    @Column(name = "created_at", updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    val color: String? = null,
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    val price: BigDecimal,
+
+    val quantity: Byte = 1
 )

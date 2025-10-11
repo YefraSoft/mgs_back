@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: mgsapi
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/mpgv1
+    username: root
+    password: 79315
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format: true
+
+  boot:
+    admin:
+      client:
+        enabled: false
+
+cache:
+  type: simple
+  cache-names:
+    - parts
+    - sales
+    - tickets
+
+jwt:
+  secret: 451b21bd88ca657dbf60f88ebb7ecba4fbbcc61b323010f630368afebd1afd28

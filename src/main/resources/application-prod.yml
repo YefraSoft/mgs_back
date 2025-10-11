@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: mgsapi
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format: false
+
+  boot:
+    admin:
+      client:
+        enabled: false
+
+cache:
+  type: simple
+  cache-names:
+    - parts
+    - sales
+
+jwt:
+  secret: ${JWT_SECRET}
+
+cors:
+  allowed:
+    origin: ${CORS_ALLOWED_ORIGIN}

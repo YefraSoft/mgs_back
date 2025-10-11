@@ -26,29 +26,36 @@ class JwtFilter(private val jwtService: JwtService, private val userRepo: UserRe
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             val token = authorizationHeader.substring(7)
             try {
-                val email = jwtService.extractEmail(token)
-                if (email != null && SecurityContextHolder.getContext().authentication == null) {
-                    val user = userRepo.findByEmail(email)
-                    if (user == null) {
-                        sendCustomError(response, HttpServletResponse.SC_UNAUTHORIZED, "User not found!")
-                        return
+                if (!jwtService.isTokenValid(token)) {
+                    sendCustomError(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token")
+                    return
+                }
+                val username = jwtService.extractUsername(token)
+                if (username != null && SecurityContextHolder.getContext().authentication == null) {
+                    var role = jwtService.extractRole(token)
+                    if (role == null) {
+                        val user = userRepo.findByUsername(username)
+                        if (user == null) {
+                            sendCustomError(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid authentication")
+                            return
+                        }
+                        role = user.role.role.name
                     }
-                    val role = user.role.role ?: "user"
-                    val authorities = listOf(SimpleGrantedAuthority("ROLE_${role.toString().uppercase()}"))
+                    val authorities = listOf(SimpleGrantedAuthority("ROLE_${role.uppercase()}"))
                     val authentication = UsernamePasswordAuthenticationToken(
-                        email, null, authorities
+                        username, null, authorities
                     )
                     authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
                     SecurityContextHolder.getContext().authentication = authentication
                 }
             } catch (e: SignatureException) {
-                sendCustomError(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid Token Signature")
+                sendCustomError(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid token signature")
                 return
             } catch (e: ExpiredJwtException) {
-                sendCustomError(response, HttpServletResponse.SC_UNAUTHORIZED, "Expired Token")
+                sendCustomError(response, HttpServletResponse.SC_UNAUTHORIZED, "Token has expired")
                 return
             } catch (e: Exception) {
-                sendCustomError(response, HttpServletResponse.SC_FORBIDDEN, "Invalid Token or Access Denied")
+                sendCustomError(response, HttpServletResponse.SC_UNAUTHORIZED, "Authentication failed")
                 return
             }
         }
@@ -59,7 +66,7 @@ class JwtFilter(private val jwtService: JwtService, private val userRepo: UserRe
         response.status = status
         response.contentType = "application/json"
         response.characterEncoding = "UTF-8"
-        response.writer.write(message)
+        response.writer.write("{\"error\": \"$message\"}")
         response.writer.flush()
     }
 

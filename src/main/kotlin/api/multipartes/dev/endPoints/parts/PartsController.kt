@@ -1,20 +1,20 @@
 package api.multipartes.dev.endPoints.parts
 
+import api.multipartes.dev.dtos.PartResponse
 import api.multipartes.dev.models.Part
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-
 
 @RestController
 @RequestMapping("/api/parts")
 class PartsController(private val service: PartsService) {
 
     @GetMapping
-    fun getAllParts(): ResponseEntity<List<Part>> = ResponseEntity.ok(service.findAll())
+    fun getAllParts(): ResponseEntity<List<PartResponse>> = ResponseEntity.ok(service.findAll())
 
-    @GetMapping("{id}")
-    fun getPartById(@PathVariable id: Int): ResponseEntity<Part> {
+    @GetMapping("/{id}")
+    fun getPartById(@PathVariable id: Int): ResponseEntity<PartResponse> {
         val part = service.findById(id)
         return if (part != null) ResponseEntity.ok(part) else ResponseEntity.notFound().build()
     }

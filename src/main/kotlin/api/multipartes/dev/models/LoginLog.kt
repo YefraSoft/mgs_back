@@ -11,15 +11,18 @@ data class LoginLog(
     val id: Int? = null,
 
     @ManyToOne
-    @JoinColumn(name = "role_user")
-    val roleUser: Role,
+    @JoinColumn(name = "user_id", nullable = false)
+    val user: User,
 
-    @Column(name = "ip_address")
-    val ipAddress: String,
+    @Column(name = "ip_address", length = 45)
+    val ipAddress: String? = null,
 
     @Column(name = "user_agent", columnDefinition = "TEXT")
-    val userAgent: String,
+    val userAgent: String? = null,
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "role_snapshot", length = 50)
+    val roleSnapshot: String? = null,
+
+    @Column(name = "created_at", nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now()
 )
