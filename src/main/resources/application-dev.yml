@@ -30,6 +30,8 @@ cache:
     - brands
     - models
     - tickets
+    - customers
+    - customer-issues
 
 jwt:
   secret: 451b21bd88ca657dbf60f88ebb7ecba4fbbcc61b323010f630368afebd1afd28

@@ -29,6 +29,8 @@ cache:
     - brands
     - models
     - tickets
+    - customers
+    - customer-issues
 
 jwt:
   secret: ${JWT_SECRET}

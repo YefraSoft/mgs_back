@@ -108,3 +108,44 @@ data class ModelResponse(
     val engine: String,
     val vehicleClass: String
 )
+
+// ========== CUSTOMER DTOs ==========
+data class CreateCustomerRequest(
+    val name: String,
+    val phone: String,
+    val rfc: String?
+)
+
+data class UpdateCustomerRequest(
+    val name: String,
+    val phone: String,
+    val rfc: String?
+)
+
+data class CustomerResponse(
+    val id: Int,
+    val name: String,
+    val phone: String,
+    val rfc: String?
+)
+
+// ========== CUSTOMER ISSUES DTOs ==========
+data class CreateCustomerIssueRequest(
+    val problem: String,
+    val customerId: Int?
+)
+
+data class UpdateCustomerIssueRequest(
+    val problem: String,
+    val status: String, // "ATTENDED", "REJECTED", "NOT_FOUND", "PENDING"
+    val customerId: Int?
+)
+
+data class CustomerIssueResponse(
+    val id: Int,
+    val problem: String,
+    val status: String,
+    val createdAt: LocalDateTime,
+    val customerId: Int?,
+    val customerName: String?
+)
