@@ -70,5 +70,4 @@ class JwtFilter(private val jwtService: JwtService, private val userRepo: UserRe
         response.writer.flush()
     }
 
-    override fun destroy() {}
 }
