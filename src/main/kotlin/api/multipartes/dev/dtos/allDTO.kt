@@ -74,8 +74,7 @@ data class PartResponse(
     val code: String?,
     val name: String,
     val side: String,
-    val categoryId: Int,
-    val categoryName: String,
+    val category: String,
     val color: String?,
     val price: BigDecimal,
     val quantity: Byte

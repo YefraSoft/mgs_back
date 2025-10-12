@@ -9,6 +9,9 @@ data class CustomerInvoiceData(
     @Column(length = 13)
     val rfc: String,
 
+    @Column(name = "business_name", nullable = false)
+    val businessName: String,
+
     @Column(nullable = false)
     val address: String,
 

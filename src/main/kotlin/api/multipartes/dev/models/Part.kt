@@ -1,8 +1,10 @@
 package api.multipartes.dev.models
 
+import api.multipartes.dev.enums.CategoryType
 import api.multipartes.dev.enums.SideType
 import jakarta.persistence.*
 import java.math.BigDecimal
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "parts")
@@ -20,14 +22,21 @@ data class Part(
     @Column(nullable = false)
     val side: SideType,
 
-    @ManyToOne
-    @JoinColumn(name = "part_category_id", nullable = false)
-    val partCategory: PartCategory,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category_type", nullable = false)
+    val categoryType: CategoryType,
 
     val color: String? = null,
 
     @Column(nullable = false, precision = 10, scale = 2)
     val price: BigDecimal,
 
-    val quantity: Byte = 1
+    val quantity: Byte = 1,
+
+    @ManyToOne
+    @JoinColumn(name = "model_id")
+    val model: Model? = null,
+
+    @Column(name = "created_at", nullable = false)
+    val createdAt: LocalDateTime = LocalDateTime.now()
 )

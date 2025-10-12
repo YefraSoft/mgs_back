@@ -1,0 +1,14 @@
+spring:
+  profiles:
+    active: dev
+
+cache:
+  type: simple
+  cache-names:
+    - parts
+    - sales
+    - brands
+    - models
+    - tickets
+    - customers
+    - customer-issues

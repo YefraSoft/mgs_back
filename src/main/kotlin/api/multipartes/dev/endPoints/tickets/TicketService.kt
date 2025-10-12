@@ -78,8 +78,8 @@ class TicketService(
                 SaleResponse(
                     id = sale.id!!,
                     ticketFolio = sale.ticket.folio,
-                    partId = sale.part.id!!,
-                    partName = sale.part.name,
+                    partId = sale.part?.id!!,
+                    partName = sale.part?.name ?: sale.partName!!,
                     quantity = sale.quantity,
                     price = sale.price
                 )
@@ -103,8 +103,8 @@ class TicketService(
                 SaleResponse(
                     id = sale.id!!,
                     ticketFolio = sale.ticket.folio,
-                    partId = sale.part.id!!,
-                    partName = sale.part.name,
+                    partId = sale.part?.id!!,
+                    partName = sale.part?.name ?: sale.partName!!,
                     quantity = sale.quantity,
                     price = sale.price
                 )
@@ -128,8 +128,8 @@ class TicketService(
                     SaleResponse(
                         id = sale.id!!,
                         ticketFolio = sale.ticket.folio,
-                        partId = sale.part.id!!,
-                        partName = sale.part.name,
+                        partId = sale.part?.id!!,
+                        partName = sale.part?.name ?: sale.partName!!,
                         quantity = sale.quantity,
                         price = sale.price
                     )
@@ -153,8 +153,8 @@ class TicketService(
                     SaleResponse(
                         id = sale.id!!,
                         ticketFolio = sale.ticket.folio,
-                        partId = sale.part.id!!,
-                        partName = sale.part.name,
+                        partId = sale.part?.id!!,
+                        partName = sale.part?.name ?: sale.partName!!,
                         quantity = sale.quantity,
                         price = sale.price
                     )
@@ -178,8 +178,8 @@ class TicketService(
                     SaleResponse(
                         id = sale.id!!,
                         ticketFolio = sale.ticket.folio,
-                        partId = sale.part.id!!,
-                        partName = sale.part.name,
+                        partId = sale.part?.id!!,
+                        partName = sale.part?.name ?: sale.partName!!,
                         quantity = sale.quantity,
                         price = sale.price
                     )

@@ -4,7 +4,7 @@ import api.multipartes.dev.dtos.SaleResponse
 import api.multipartes.dev.models.Sale
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
-import java.util.Optional
+import java.util.*
 
 @Service
 class SalesService(
@@ -21,8 +21,8 @@ class SalesService(
             SaleResponse(
                 id = sale.id!!,
                 ticketFolio = sale.ticket.folio,
-                partId = sale.part.id!!,
-                partName = sale.part.name,
+                partId = sale.part?.id!!,
+                partName = sale.part?.name ?: sale.partName!!,
                 quantity = sale.quantity,
                 price = sale.price
             )
@@ -34,8 +34,8 @@ class SalesService(
             SaleResponse(
                 id = sale.id!!,
                 ticketFolio = sale.ticket.folio,
-                partId = sale.part.id!!,
-                partName = sale.part.name,
+                partId = sale.part?.id!!,
+                partName = sale.part?.name ?: sale.partName!!,
                 quantity = sale.quantity,
                 price = sale.price
             )
@@ -47,8 +47,8 @@ class SalesService(
             SaleResponse(
                 id = sale.id!!,
                 ticketFolio = sale.ticket.folio,
-                partId = sale.part.id!!,
-                partName = sale.part.name,
+                partId = sale.part?.id!!,
+                partName = sale.part?.name ?: sale.partName!!,
                 quantity = sale.quantity,
                 price = sale.price
             )

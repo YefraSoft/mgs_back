@@ -21,17 +21,6 @@ spring:
       client:
         enabled: false
 
-cache:
-  type: simple
-  cache-names:
-    - parts
-    - sales
-    - brands
-    - models
-    - tickets
-    - customers
-    - customer-issues
-
 jwt:
   secret: ${JWT_SECRET}
 

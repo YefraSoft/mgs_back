@@ -40,3 +40,6 @@ src/main/resources/application*.properties.disable
 
 # EXCEPCIÓN: Permitir SOLO application-prod.yml
 !src/main/resources/application-prod.yml
+!src/main/resources/application.yml
+
+ENDPOINT_TEST.md

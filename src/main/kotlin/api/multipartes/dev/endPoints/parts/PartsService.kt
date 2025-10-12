@@ -18,8 +18,7 @@ class PartsService(private val repo: PartsRepo) {
                 code = part.code,
                 name = part.name,
                 side = part.side.name,
-                categoryId = part.partCategory.id!!,
-                categoryName = part.partCategory.category.name,
+                category = part.categoryType.name,
                 color = part.color,
                 price = part.price,
                 quantity = part.quantity
@@ -34,8 +33,7 @@ class PartsService(private val repo: PartsRepo) {
             code = part.code,
             name = part.name,
             side = part.side.name,
-            categoryId = part.partCategory.id!!,
-            categoryName = part.partCategory.category.name,
+            category = part.categoryType.name,
             color = part.color,
             price = part.price,
             quantity = part.quantity

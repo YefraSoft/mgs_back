@@ -1,6 +1,7 @@
 package api.multipartes.dev.models
 
 import jakarta.persistence.*
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "invoices")
@@ -21,5 +22,8 @@ data class Invoice(
     val receiverCustomer: CustomerInvoiceData? = null,
 
     @Column(name = "url_document", nullable = false, columnDefinition = "TEXT")
-    val urlDocument: String
+    val urlDocument: String,
+
+    @Column(name = "created_at", nullable = false)
+    val createdAt: LocalDateTime = LocalDateTime.now()
 )
