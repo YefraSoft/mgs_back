@@ -4,13 +4,18 @@ import jakarta.persistence.*
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "login_logs")
+@Table(
+    name = "login_logs", indexes = [
+        Index(name = "idx_user_id", columnList = "user_id"),
+        Index(name = "idx_created_at", columnList = "created_at")
+    ]
+)
 data class LoginLog(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null,
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     val user: User,
 

@@ -7,8 +7,8 @@ import api.multipartes.dev.endPoints.customers.CustomerIssueRepository
 import api.multipartes.dev.endPoints.models.ModelRepository
 import api.multipartes.dev.endPoints.models.ModelService
 import api.multipartes.dev.endPoints.parts.PartsRepo
-import api.multipartes.dev.endPoints.sales.SalesRepo
-import api.multipartes.dev.repositories.TicketRepository
+import api.multipartes.dev.sales.repository.SalesRepository
+import api.multipartes.dev.ticket.repository.TicketRepository
 import api.multipartes.dev.config.JwtSecretValidator
 import api.multipartes.dev.config.RateLimitService
 import api.multipartes.dev.config.GlobalExceptionHandler
@@ -45,7 +45,7 @@ class DevApplicationTests {
     private lateinit var partsRepository: PartsRepo
 
     @Autowired
-    private lateinit var salesRepository: SalesRepo
+    private lateinit var salesRepository: SalesRepository
 
     @Autowired
     private lateinit var ticketRepository: TicketRepository

@@ -1,7 +1,7 @@
 package api.multipartes.dev.config
 
 import api.multipartes.dev.JwtService
-import api.multipartes.dev.user.UserRepo
+import api.multipartes.dev.user.repository.UserRepository
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.security.SignatureException
 import jakarta.servlet.FilterChain
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
-class JwtFilter(private val jwtService: JwtService, private val userRepo: UserRepo) :
+class JwtFilter(private val jwtService: JwtService, private val userRepo: UserRepository) :
     OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -33,13 +33,17 @@ class JwtFilter(private val jwtService: JwtService, private val userRepo: UserRe
                 val username = jwtService.extractUsername(token)
                 if (username != null && SecurityContextHolder.getContext().authentication == null) {
                     var role = jwtService.extractRole(token)
-                    if (role == null) {
+                    if (role.isNullOrBlank()) {
                         val user = userRepo.findByUsername(username)
-                        if (user == null) {
-                            sendCustomError(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid authentication")
-                            return
-                        }
-                        role = user.role.role.name
+                            ?: run {
+                                sendCustomError(response, HttpServletResponse.SC_UNAUTHORIZED, "Invalid authentication")
+                                return
+                            }
+                        role = user.role?.role?.name
+                            ?: run {
+                                sendCustomError(response, HttpServletResponse.SC_UNAUTHORIZED, "User without role")
+                                return
+                            }
                     }
                     val authorities = listOf(SimpleGrantedAuthority("ROLE_${role.uppercase()}"))
                     val authentication = UsernamePasswordAuthenticationToken(

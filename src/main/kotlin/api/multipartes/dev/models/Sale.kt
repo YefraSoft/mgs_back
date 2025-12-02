@@ -1,22 +1,25 @@
 package api.multipartes.dev.models
 
-import api.multipartes.dev.enums.WarrantyStatus
 import jakarta.persistence.*
 import java.math.BigDecimal
-import java.time.LocalDate
 
 @Entity
-@Table(name = "sales")
+@Table(
+    name = "sales", indexes = [
+        Index(name = "idx_ticket_folio", columnList = "ticket_folio"),
+        Index(name = "idx_part_id", columnList = "part_id")
+    ]
+)
 data class Sale(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null,
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_folio", nullable = false)
     val ticket: Ticket,
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "part_id")
     val part: Part? = null,
 
@@ -28,13 +31,7 @@ data class Sale(
     @Column(nullable = false, precision = 10, scale = 2)
     val price: BigDecimal,
 
-    @Column(name = "has_warranty")
-    val hasWarranty: Boolean = false,
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "warranty_status")
-    val warrantyStatus: WarrantyStatus = WarrantyStatus.PENDING,
-
-    @Column(name = "warranty_expiration_date")
-    val warrantyExpirationDate: LocalDate? = null
+    @OneToOne(mappedBy = "sale", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    val warranty: Warranty? = null
+    
 )

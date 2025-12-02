@@ -3,11 +3,17 @@ package api.multipartes.dev.models
 import api.multipartes.dev.enums.CategoryType
 import api.multipartes.dev.enums.SideType
 import jakarta.persistence.*
+import jakarta.validation.constraints.NotBlank
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "parts")
+@Table(
+    name = "parts", indexes = [
+        Index(name = "idx_model_id", columnList = "model_id"),
+        Index(name = "idx_code", columnList = "code")
+    ]
+)
 data class Part(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,6 +22,7 @@ data class Part(
     val code: String? = null,
 
     @Column(nullable = false)
+    @NotBlank(message = "Part name is required")
     val name: String,
 
     @Enumerated(EnumType.STRING)
@@ -33,7 +40,7 @@ data class Part(
 
     val quantity: Byte = 1,
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "model_id")
     val model: Model? = null,
 

@@ -7,13 +7,13 @@ import api.multipartes.dev.dtos.RegisterRequest
 import api.multipartes.dev.models.User
 import api.multipartes.dev.models.UserRole
 import api.multipartes.dev.role.RoleRepository
-import api.multipartes.dev.user.UserRepo
+import api.multipartes.dev.user.repository.UserRepository
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 
 @Service
 class AuthService(
-    private val repo: UserRepo,
+    private val repo: UserRepository,
     private val roleRepo: RoleRepository,
     private val encoder: BCryptPasswordEncoder,
     private val jwtService: JwtService
@@ -21,18 +21,23 @@ class AuthService(
 
 
     fun login(request: LoginRequest): LoginResponse {
-        val user = repo.findByUsername(request.username) ?: throw IllegalArgumentException("Invalid credentials!")
+        val user = repo.findByUsername(request.username)
+            ?: throw IllegalArgumentException("Invalid credentials!")
 
         if (!encoder.matches(request.password, user.password)) {
             throw IllegalArgumentException("Invalid credentials!")
         }
+
+        val roleName = user.role?.role?.name
+            ?: throw IllegalStateException("User ${user.username} does not have an assigned role")
+
         val token = jwtService.generateToken(
             username = user.username,
-            role = user.role.role.name,
+            role = roleName,
             userId = user.id
         )
 
-        return LoginResponse(user.role.role.name, token)
+        return LoginResponse(roleName, token)
     }
 
     fun register(request: RegisterRequest): UserRole {
@@ -49,9 +54,9 @@ class AuthService(
             password = encoder.encode(request.password),
             role = role
         )
-        val roleUser =  repo.save(newUser).role
+        val roleUser = repo.save(newUser).role
 
-        return roleUser
+        return roleUser!!
     }
 
 }

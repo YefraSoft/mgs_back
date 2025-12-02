@@ -19,19 +19,20 @@ Esta es la base de datos donde se conecta la API
 
 ```sql
 -- ===========================================================
--- Script de creación de base de datos: mpgv1
+-- Script de creación de base de datos: mpgv2 27/11/2025
 -- Deshuace Garcia - Sistema de gestión de inventario de piezas
 -- ===========================================================
 
-DROP DATABASE IF EXISTS mpgv1;
+DROP DATABASE IF EXISTS mpgv2;
 
-CREATE DATABASE mpgv1;
+CREATE DATABASE mpgv2;
 
-USE mpgv1;
+USE mpgv2;
 
 -- ===========================================================
 -- TABLA: brands
--- Descripción: Almacena las marcas de vehículos disponibles
+-- Descripción: Lista de marcas de vehículos soportadas por el sistema. Se usa para relacionar modelos y compatibilidad de piezas.
+-- Requisitos relacionados: REQ-001, REQ-007
 -- ===========================================================
 DROP TABLE IF EXISTS brands;
 
@@ -43,7 +44,8 @@ CREATE TABLE brands (
 
 -- ===========================================================
 -- TABLA: models
--- Descripción: Almacena los modelos de vehículos por marca
+-- Descripción: Modelos por marca; contiene VIN/serial, año, transmisión y clase para identificar compatibilidades.
+-- Requisitos relacionados: REQ-001, REQ-002, REQ-003
 -- ===========================================================
 DROP TABLE IF EXISTS models;
 
@@ -56,48 +58,49 @@ CREATE TABLE models (
     transmission ENUM('AUTOMATIC', 'STANDARD'), -- Tipo de transmisión: Automática o Estándar
     engine VARCHAR(50) NOT NULL, -- Tipo de motor (Ejemplo: '4 cilindros', 'V6', 'Eléctrico')
     vehicle_class VARCHAR(50) NOT NULL, -- Clase del vehículo (Ejemplo: 'Sedan', 'SUV', 'Pickup', 'Coupe')
-    FOREIGN KEY (brand_id) REFERENCES brands (id) ON DELETE CASCADE, -- Relación con la tabla 'brands'
+    FOREIGN KEY (brand_id) REFERENCES brands (id) ON DELETE CASCADE, -- Al borrar una marca, se borran sus modelos
     INDEX idx_brand_id (brand_id), -- Índice para mejorar rendimiento de búsquedas
     INDEX idx_year (year) -- Índice para búsquedas por año
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ===========================================================
--- TABLA: model_images
--- Descripción: Imágenes asociadas a modelos de vehículos
+-- TABLA: purchase_vehicles
+-- Descripción: Vehículos adquiridos completos; almacena fecha y costo de adquisición para amortización y trazabilidad.
+-- Requisitos relacionados: REQ-001, REQ-004, REQ-005
 -- ===========================================================
+DROP TABLE IF EXISTS purchase_vehicles;
+
+CREATE TABLE purchase_vehicles (
+    id INT AUTO_INCREMENT PRIMARY KEY, -- Identificador único del vehículo comprado
+    model_id INT NOT NULL, -- ID del modelo del vehículo (relación con 'models')
+    purchase_date DATE, -- Fecha de compra del vehículo
+    purchase_cost DECIMAL(10, 2), -- Costo de compra del vehículo
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de creación del registro
+    FOREIGN KEY (model_id) REFERENCES models (id) ON DELETE RESTRICT, -- No permite borrar un modelo si existen compras asociadas
+    INDEX idx_model_id (model_id),
+    INDEX idx_purchase_date (purchase_date)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ===========================================================
+-- TABLA: model_images
+-- Descripción: URLs de imágenes por modelo para la galería del sitio; registra fecha de creación.
+-- Requisitos relacionados: REQ-005
+-- ===========================================================
+DROP TABLE IF EXISTS model_images;
+
 CREATE TABLE model_images (
     id INT AUTO_INCREMENT PRIMARY KEY,
     model_id INT NOT NULL,
-    image_url VARCHAR(500) NOT NULL,
+    image_url VARCHAR(500) NOT NULL, -- URL de la imagen asociada al modelo
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (model_id) REFERENCES models (id) ON DELETE CASCADE,
     INDEX idx_model_id (model_id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ===========================================================
--- TABLA: part_categories
--- Descripción: Categorías de piezas del vehículo
--- ===========================================================
-DROP TABLE IF EXISTS part_categories;
-
--- CREATE TABLE part_categories (
---    id INT AUTO_INCREMENT PRIMARY KEY, -- Identificador único para cada categoría
---    category ENUM(
---        'COLLISION', -- Piezas de colisión (parachoques, guardabarros)
---        'CHASSIS', -- Piezas del chasis
---       'ENGINE', -- Piezas del motor
---      'TRANSMISSION', -- Piezas de transmisión
---        'SUSPENSION', -- Piezas de suspensión
---        'BRAKES', -- Piezas de frenos
---        'INSIDE', -- Piezas interiores
---        'ELECTRICAL', -- Piezas eléctricas
---        'OTHER' -- Otras piezas
---    ) NOT NULL -- Categoría de la pieza
---) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
-
--- ===========================================================
 -- TABLA: parts
--- Descripción: Almacena las piezas disponibles en el inventario
+-- Descripción: Catálogo de piezas con sus atributos (lado, categoría, color, precio y stock) y relación opcional al modelo de vehículo.
+-- Requisitos relacionados: REQ-006, REQ-007, REQ-008, REQ-009
 -- ===========================================================
 DROP TABLE IF EXISTS parts;
 
@@ -137,12 +140,15 @@ CREATE TABLE parts (
 
 -- ===========================================================
 -- TABLA: parts_images
--- Descripción: Imágenes asociadas a piezas
+-- Descripción: Imágenes vinculadas a piezas del inventario para mostrar en la web o en listados.
+-- Requisitos relacionados: REQ-009
 -- ===========================================================
+DROP TABLE IF EXISTS parts_images;
+
 CREATE TABLE parts_images (
     id INT AUTO_INCREMENT PRIMARY KEY,
     part_id INT NOT NULL,
-    image_url VARCHAR(500) NOT NULL,
+    image_url VARCHAR(500) NOT NULL, -- URL de la imagen asociada a la pieza
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (part_id) REFERENCES parts (id) ON DELETE CASCADE,
     INDEX idx_part_id (part_id)
@@ -183,9 +189,26 @@ CREATE TABLE users (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ===========================================================
--- TABLA: tickets
--- Descripción: Tickets de venta generados
+-- TABLA: customer
+-- Descripción: Información de clientes del negocio
 -- ===========================================================
+DROP TABLE IF EXISTS customer;
+
+CREATE TABLE customer (
+    id INT AUTO_INCREMENT PRIMARY KEY, -- Identificador único para cada cliente
+    name VARCHAR(100) NOT NULL, -- Nombre completo o razón social del cliente
+    phone VARCHAR(20) NOT NULL, -- Número telefónico de contacto
+    rfc VARCHAR(13), -- RFC del cliente (opcional), usado para facturación cuando exista
+    INDEX idx_phone (phone), -- Índice para búsqueda por teléfono
+    INDEX idx_rfc (rfc) -- Índice para búsqueda por RFC
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ===========================================================
+-- TABLA: tickets
+-- Descripción: Tickets de venta (folio UUID) que agregan ventas, método de pago, total y metadata para facturación.
+-- Requisitos relacionados: REQ-011, REQ-013, REQ-014, REQ-015
+-- ===========================================================
+
 DROP TABLE IF EXISTS tickets;
 
 CREATE TABLE tickets (
@@ -210,18 +233,51 @@ CREATE TABLE tickets (
 -- TABLA: ticket_images
 -- Descripción: Imágenes asociadas a tickets
 -- ===========================================================
+DROP TABLE IF EXISTS ticket_images;
+
+-- ===========================================================
+-- TABLA: ticket_images
+-- Descripción: Imágenes asociadas a tickets (evidencias o recibos). Guarda la URL de la imagen y fecha de creación.
+-- Requisitos relacionados: REQ-014 (detalles del ticket), REQ-033 (evidencia en reclamaciones)
+-- ===========================================================
 CREATE TABLE ticket_images (
     id INT AUTO_INCREMENT PRIMARY KEY,
     ticket_folio CHAR(36) NOT NULL, -- Folio del ticket
-    image_url VARCHAR(500) NOT NULL,
+    image_url VARCHAR(500) NOT NULL, -- URL de la imagen (foto del ticket o evidencia)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (ticket_folio) REFERENCES tickets (folio) ON DELETE CASCADE,
     INDEX idx_ticket_folio (ticket_folio)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ===========================================================
+-- TABLA: ticket_delivery
+-- Descripción: Gestiona entregas a domicilio asociadas a un ticket; registra dirección, estado y trazabilidad.
+-- Requisitos relacionados: REQ-023, REQ-024, REQ-025
+-- ===========================================================
+CREATE TABLE ticket_delivery (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ticket_folio CHAR(36) NOT NULL, -- Folio del ticket asociado
+    customer_id INT NOT NULL, -- Cliente receptor de la entrega
+    delivery_address VARCHAR(255) NOT NULL, -- Dirección completa de entrega
+    delivery_status ENUM(
+        'PENDING',
+        'IN_TRANSIT',
+        'DELIVERED',
+        'FAILED'
+    ) NOT NULL DEFAULT 'PENDING', -- Estado de la entrega
+    delivered_at DATETIME, -- Fecha/hora de entrega
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (ticket_folio) REFERENCES tickets (folio) ON DELETE CASCADE,
+    FOREIGN KEY (customer_id) REFERENCES customer (id) ON DELETE RESTRICT,
+    INDEX idx_ticket_folio_delivery (ticket_folio),
+    INDEX idx_customer_id_delivery (customer_id),
+    INDEX idx_delivery_status (delivery_status)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ===========================================================
 -- TABLA: sales
--- Descripción: Detalle de las ventas por ticket
+-- Descripción: Línea de detalle por ticket: pieza vendida, cantidad, precio y campos de garantía asociados.
+-- Requisitos relacionados: REQ-011, REQ-012, REQ-031, REQ-033
 -- ===========================================================
 DROP TABLE IF EXISTS sales;
 
@@ -231,20 +287,11 @@ CREATE TABLE sales (
     part_id INT, -- ID de la pieza vendida (relacionado con la tabla 'parts')
     quantity TINYINT DEFAULT 1, -- Cantidad de piezas vendidas
     price DECIMAL(10, 2) NOT NULL, -- Precio unitario de la pieza al momento de la venta
-    has_warranty BIT DEFAULT 0, -- Indica si tiene garantía
-    warranty_status ENUM(
-        'ACTIVE', -- El problema fue atendido
-        'REJECTED', -- El problema fue rechazado
-        'EXPIRED', -- No se encontró el problema reportado
-        'PENDING' -- Problema pendiente de atención
-    ) DEFAULT 'PENDING', -- Estado de la garantía
-    warranty_expiration_date DATE, -- Fecha de expiración de garantía
-    part_name VARCHAR(200), -- Pieza no inventariada
+    part_name VARCHAR(200), -- Pieza no inventariada (se usa cuando la pieza no existe en inventario)
     FOREIGN KEY (ticket_folio) REFERENCES tickets (folio) ON DELETE CASCADE, -- Relación con la tabla 'tickets'
     FOREIGN KEY (part_id) REFERENCES parts (id) ON DELETE CASCADE, -- Relación con la tabla 'parts'
     INDEX idx_ticket_folio (ticket_folio), -- Índice para consulta de ventas por ticket
     INDEX idx_part_id (part_id), -- Índice para reportes de piezas más vendidas
-    INDEX idx_warranty (has_warranty, warranty_status),
     CHECK (
         part_id IS NOT NULL
         OR part_name IS NOT NULL
@@ -252,12 +299,78 @@ CREATE TABLE sales (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ===========================================================
+-- TABLA: warranty
+-- Descripción: Información de la garantía asociada a una venta. Registra estado, duración y vínculo con la venta.
+-- Requisitos relacionados: REQ-029, REQ-030, REQ-031, REQ-032
+-- ===========================================================
+DROP TABLE IF EXISTS warranty;
+
+CREATE TABLE warranty (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sale_id INT NOT NULL, -- Venta asociada
+    status ENUM(
+        'ACTIVE',
+        'REJECTED',
+        'EXPIRED',
+        'PENDING'
+    ) DEFAULT 'PENDING', -- Estado de la garantía
+    expiration_date DATE, -- Fecha de expiración de la garantía
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (sale_id) REFERENCES sales (id) ON DELETE CASCADE,
+    INDEX idx_sale_id (sale_id),
+    INDEX idx_status (status)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ===========================================================
+-- TABLA: warranty_claim
+-- Descripción: Evidencias y reclamaciones asociadas a una garantía; guarda fotos, descripción y tipo de reclamo.
+-- Requisitos relacionados: REQ-033, REQ-034, REQ-035, REQ-036
+-- ===========================================================
+DROP TABLE IF EXISTS warranty_claim;
+
+CREATE TABLE warranty_claim (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    warranty_id INT NOT NULL, -- Referencia a la garantía
+    image_url VARCHAR(500) NOT NULL,
+    description VARCHAR(255), -- Descripción del defecto o motivo de la reclamación
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    claim_type ENUM('RETURN', 'EXCHANGE') NOT NULL,
+    FOREIGN KEY (warranty_id) REFERENCES warranty (id) ON DELETE CASCADE,
+    INDEX idx_warranty_id (warranty_id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ===========================================================
+-- TABLA: customer_issues
+-- Descripción: Registra quejas/problemas reportados por clientes, su estado y relación con cliente/ticket.
+-- Requisitos relacionados: REQ-041, REQ-042, REQ-043, REQ-044
+-- ===========================================================
+DROP TABLE IF EXISTS customer_issues;
+
+CREATE TABLE customer_issues (
+    id INT AUTO_INCREMENT PRIMARY KEY, -- Identificador único del problema
+    problem VARCHAR(255) NOT NULL, -- Descripción del problema reportado por el cliente
+    status ENUM(
+        'ATTENDED', -- El problema fue atendido
+        'REJECTED', -- El problema fue rechazado
+        'NOT_FOUND', -- No se encontró el problema reportado
+        'PENDING' -- Problema pendiente de atención
+    ) NOT NULL DEFAULT 'PENDING', -- Estado actual del problema
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de registro del problema
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- Fecha y hora de la última actualización
+    customer_id INT, -- ID del cliente que reporta el problema
+    FOREIGN KEY (customer_id) REFERENCES customer (id) ON DELETE SET NULL -- Relación con la tabla 'customer'
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ===========================================================
 -- TABLA: customer_invoice_data
--- Descripción: Datos fiscales de clientes para facturación
+-- Descripción: Datos fiscales (RFC, razón social, dirección) usados para emitir facturas a clientes.
+-- Requisitos relacionados: REQ-039
 -- ===========================================================
 DROP TABLE IF EXISTS customer_invoice_data;
 
 CREATE TABLE customer_invoice_data (
+    customer_id INT NOT NULL,
     rfc VARCHAR(13) PRIMARY KEY NOT NULL, -- RFC único para cada cliente
     business_name VARCHAR(255) NOT NULL, -- Razón social
     address VARCHAR(255) NOT NULL, -- Dirección fiscal completa del cliente
@@ -265,12 +378,15 @@ CREATE TABLE customer_invoice_data (
     tax_regime VARCHAR(50) NOT NULL, -- Régimen fiscal del cliente
     invoice_use VARCHAR(50) NOT NULL, -- Uso del CFDI
     email VARCHAR(100) NOT NULL, -- Correo electrónico para envío de facturas
+    FOREIGN KEY (customer_id) REFERENCES customer (id) ON DELETE CASCADE, -- Relación con la tabla 'customer'
+    INDEX idx_customer_id (customer_id), -- Índice para búsqueda por ID de cliente
     INDEX idx_email (email)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ===========================================================
 -- TABLA: invoices
--- Descripción: Facturas emitidas relacionadas con tickets
+-- Descripción: Registro de facturas (folio UUID) con referencia al ticket y URL del documento XML/PDF.
+-- Requisitos relacionados: REQ-013, REQ-039
 -- ===========================================================
 DROP TABLE IF EXISTS invoices;
 
@@ -286,42 +402,6 @@ CREATE TABLE invoices (
     INDEX idx_ticket_folio (ticket_folio), -- Índice para búsqueda de facturas por ticket
     INDEX idx_receiver (receiver_customer), -- Índice para búsqueda por cliente
     INDEX idx_invoice_number (invoice_number) -- Índice para búsqueda por folio fiscal
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
-
--- ===========================================================
--- TABLA: customer
--- Descripción: Información de clientes del negocio
--- ===========================================================
-DROP TABLE IF EXISTS customer;
-
-CREATE TABLE customer (
-    id INT AUTO_INCREMENT PRIMARY KEY, -- Identificador único para cada cliente
-    name VARCHAR(100) NOT NULL, -- Nombre completo o razón social del cliente
-    phone VARCHAR(20) NOT NULL, -- Número telefónico de contacto
-    rfc VARCHAR(13), -- RFC del cliente
-    FOREIGN KEY (rfc) REFERENCES customer_invoice_data (rfc) ON DELETE SET NULL, -- Relación con la tabla 'customer_invoice_data'
-    INDEX idx_phone (phone), -- Índice para búsqueda por teléfono
-    INDEX idx_rfc (rfc) -- Índice para búsqueda por RFC
-) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
-
--- ===========================================================
--- TABLA: customer_issues
--- Descripción: Registro de problemas reportados por clientes
--- ===========================================================
-DROP TABLE IF EXISTS customer_issues;
-
-CREATE TABLE customer_issues (
-    id INT AUTO_INCREMENT PRIMARY KEY, -- Identificador único del problema
-    problem VARCHAR(255) NOT NULL, -- Descripción del problema reportado por el cliente
-    status ENUM(
-        'ATTENDED', -- El problema fue atendido
-        'REJECTED', -- El problema fue rechazado
-        'NOT_FOUND', -- No se encontró el problema reportado
-        'PENDING' -- Problema pendiente de atención
-    ) NOT NULL DEFAULT 'PENDING', -- Estado actual del problema
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha y hora de registro del problema
-    customer_id INT, -- ID del cliente que reporta el problema
-    FOREIGN KEY (customer_id) REFERENCES customer (id) ON DELETE SET NULL -- Relación con la tabla 'customer'
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ===========================================================
@@ -371,19 +451,94 @@ CREATE TABLE app_logs (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ===========================================================
--- TABLA: warranty_claim
--- Evidencia fotográfica de reclamaciones de garantía
--- Debe dejar el precio de la venta en 0 cando sea RETURN y modificar el total del ticked
+-- TABLA: reservations (Apartados)
+-- Sistema de apartado de piezas con anticipo
+-- REQ-019, REQ-020, REQ-021, REQ-022
 -- ===========================================================
-CREATE TABLE warranty_claim (
+DROP TABLE IF EXISTS reservations;
+
+CREATE TABLE reservations (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    sale_id INT NOT NULL,
-    image_url VARCHAR(500) NOT NULL,
-    description VARCHAR(255) COMMENT 'Descripción del defecto mostrado',
+    customer_id INT NOT NULL,
+    deposit DECIMAL(10, 2) NOT NULL, -- Anticipo entregado
+    total_price DECIMAL(10, 2) NOT NULL, -- Precio total de la(s) pieza(s)
+    part_id INT, -- Pieza reservada (opcional, si existe en inventario)
+    part_name VARCHAR(255), -- Nombre de la pieza cuando no está en inventario
+    balance DECIMAL(10, 2) NOT NULL, -- Saldo pendiente por pagar
+    expiration_date DATE NOT NULL, -- Fecha límite para completar el pago
+    status ENUM(
+        'ACTIVE',
+        'COMPLETED',
+        'CANCELLED',
+        'EXPIRED'
+    ) DEFAULT 'ACTIVE', -- Estado del apartado
+    completed_ticket_folio CHAR(36), -- Folio del ticket generado al completar la venta
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    claim_type ENUM('RETURN', 'EXCHANGE') NOT NULL COMMENT 'Tipo de garantía: devolución o cambio',
-    FOREIGN KEY (sale_id) REFERENCES sales (id) ON DELETE CASCADE,
-    INDEX idx_sale_id (sale_id)
+    completed_at DATETIME,
+    FOREIGN KEY (customer_id) REFERENCES customer (id) ON DELETE RESTRICT,
+    FOREIGN KEY (completed_ticket_folio) REFERENCES tickets (folio) ON DELETE SET NULL,
+    INDEX idx_customer_id (customer_id),
+    INDEX idx_part_id (part_id),
+    INDEX idx_status (status),
+    INDEX idx_expiration (expiration_date),
+    CHECK (
+        part_id IS NOT NULL
+        OR part_name IS NOT NULL
+    )
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ===========================================================
+-- TABLA: parts_reserved
+-- Piezas apartadas en una reserva, en caso de cancelación se liberan al inventario.
+-- ===========================================================
+
+DROP TABLE IF EXISTS parts_reserved;
+
+CREATE TABLE parts_reserved (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    reservation_id INT NOT NULL,
+    part_id INT,
+    part_name VARCHAR(255), -- Pieza no inventariada
+    quantity TINYINT DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (reservation_id) REFERENCES reservations (id) ON DELETE CASCADE,
+    FOREIGN KEY (part_id) REFERENCES parts (id) ON DELETE RESTRICT,
+    INDEX idx_reservation_id (reservation_id),
+    INDEX idx_part_id (part_id),
+    CHECK (
+        part_id IS NOT NULL
+        OR part_name IS NOT NULL
+    )
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ===========================================================
+-- TABLA: expenses
+-- Descripción: Registra gastos operativos con categoría y fechas para análisis y reportes mensuales.
+-- Requisitos relacionados: REQ-045, REQ-046, REQ-047, REQ-048
+-- ===========================================================
+DROP TABLE IF EXISTS expenses;
+
+CREATE TABLE expenses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL, -- Concepto/descripción del gasto
+    amount DECIMAL(10, 2) NOT NULL, -- Monto del gasto
+    category ENUM(
+        'VEHICLE_PURCHASE',
+        'SERVICES',
+        'RENT',
+        'SALARIES',
+        'MAINTENANCE',
+        'UTILITIES',
+        'OTHER'
+    ) NOT NULL, -- Categoría del gasto
+    pay_before DATE NOT NULL, -- Fecha del gasto (para cálculos mensuales)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Fecha de registro
+    payment_at DATE, -- Fecha de pago efectiva
+    created_by INT NULL, -- Usuario que registró el gasto
+    FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL,
+    INDEX idx_expense_date (pay_before),
+    INDEX idx_category (category),
+    INDEX idx_created_by (created_by)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 ```
 
@@ -398,21 +553,26 @@ CREATE TABLE warranty_claim (
 #### Cambios Realizados
 
 - **Part.kt** (`src/main/kotlin/api/multipartes/dev/models/Part.kt`)
+
   - Reemplazado `partCategory` por `categoryType: CategoryType` mapeado a columna `category_type`.
   - Agregado `model: Model?` con `@JoinColumn(name = "model_id")`.
   - Agregado `createdAt: LocalDateTime` mapeado a `created_at`.
 
 - **Sale.kt** (`src/main/kotlin/api/multipartes/dev/models/Sale.kt`)
+
   - `part` ahora es opcional y se agregó `partName` (para piezas no inventariadas).
   - Agregados campos de garantía: `hasWarranty`, `warrantyStatus`, `warrantyExpirationDate`.
 
 - **Invoice.kt** (`src/main/kotlin/api/multipartes/dev/models/Invoice.kt`)
+
   - Agregado `createdAt` mapeado a `created_at`.
 
 - **CustomerInvoiceData.kt** (`src/main/kotlin/api/multipartes/dev/models/CustomerInvoiceData.kt`)
+
   - Agregado `businessName` mapeado a `business_name`.
 
 - **Nuevas Entidades**
+
   - `ModelImage.kt` → tabla `model_images`.
   - `PartImage.kt` → tabla `parts_images`.
   - `TicketImage.kt` → tabla `ticket_images`.
@@ -426,6 +586,7 @@ CREATE TABLE warranty_claim (
 #### Archivos Creados/Modificados
 
 - **Creados (7):**
+
   - `src/main/kotlin/api/multipartes/dev/models/ModelImage.kt`
   - `src/main/kotlin/api/multipartes/dev/models/PartImage.kt`
   - `src/main/kotlin/api/multipartes/dev/models/TicketImage.kt`
@@ -2105,39 +2266,47 @@ Se ha ampliado significativamente la clase `DevApplicationTests.kt` agregando 10
 **Total de tests:** 11 (1 original + 10 nuevos)
 
 1. **testContextLoads()** (original)
+
    - Validación básica de carga del contexto de Spring Boot
 
 2. **testSpringBootContextInitialization()**
+
    - Verifica que los beans principales existan en el contexto
    - Validados: BrandRepository, ModelRepository, CustomerRepository, PartsRepo
    - Status: ✓ PASS
 
 3. **testJpaRepositoriesAreInjected()**
+
    - Valida inyección de 7 repositorios JPA
    - Repositorios: BrandRepository, ModelRepository, CustomerRepository, CustomerIssueRepository, PartsRepo, SalesRepo, TicketRepository
    - Status: ✓ PASS
 
 4. **testServiceBeansAreInjected()**
+
    - Verifica inyección de servicios
    - Servicios: BrandService, ModelService
    - Status: ✓ PASS
 
 5. **testSecurityComponentsAreConfigured()**
+
    - Valida componentes de seguridad
    - Componentes: PasswordEncoder, JwtSecretValidator, RateLimitService, GlobalExceptionHandler
    - Status: ✓ PASS
 
 6. **testPasswordEncoderWorks()**
+
    - Test funcional del encoder BCrypt
    - Validación: encode + matches
    - Status: ✓ PASS
 
 7. **testJpaRepositoriesExtendJpaRepository()**
+
    - Validación de herencia de tipo para repositorios
-   - Verifica implementación de interfaz JpaRepository<*,*>
+   - Verifica implementación de interfaz JpaRepository<_,_>
    - Status: ✓ PASS
 
 8. **testApplicationContextContainsAllRequiredBeans()**
+
    - Verificación exhaustiva de 13 beans requeridos
    - Beans validados:
      - Repositorios (7): brandRepository, modelRepository, customerRepository, customerIssueRepository, partsRepo, salesRepo, ticketRepository
@@ -2146,6 +2315,7 @@ Se ha ampliado significativamente la clase `DevApplicationTests.kt` agregando 10
    - Status: ✓ PASS
 
 9. **testDatabaseConnectionIsEstablished()**
+
    - Valida conectividad a MySQL
    - Base de datos: mpgv1
    - Driver: MySQL JDBC
@@ -2166,6 +2336,7 @@ Se ha ampliado significativamente la clase `DevApplicationTests.kt` agregando 10
 **Problemas Específicos:**
 
 1. **PartsRepository vs PartsRepo**
+
    - Interfaz real: `PartsRepo` (ubicación: `src/main/kotlin/api/multipartes/dev/endPoints/parts/PartsRepo.kt`)
    - Bean name generado por Spring: `partsRepo` (camelCase del nombre de interfaz)
    - Tests buscaban: `partsRepository` (incorrecto)
@@ -2276,16 +2447,19 @@ private lateinit var jwtSecretValidator: JwtSecretValidator
 #### Observaciones Importantes
 
 1. **Convención de nombres de beans:**
+
    - Spring Data JPA usa camelCase para nombres de beans
    - Interfaz `PartsRepo` → Bean `partsRepo` (NOT `partsRepository`)
    - Interfaz `SalesRepo` → Bean `salesRepo` (NOT `salesRepository`)
 
 2. **Inyección de dependencias:**
+
    - Todas las 12 dependencias se inyectan correctamente
    - No hay conflictos de tipos genéricos
    - Spring resuelve correctamente las implementaciones de JpaRepository
 
 3. **Validación de seguridad:**
+
    - PasswordEncoder funciona correctamente (BCrypt)
    - JwtSecretValidator validador presente
    - RateLimitService inicializado
@@ -2441,15 +2615,15 @@ BASE_URL="http://${HOST_IP}:8080"  # Resultado: http://172.28.224.1:8080
 
 #### Comparativa de Scripts
 
-| Aspecto | PowerShell | Bash |
-|---------|-----------|------|
-| Entorno | Windows nativo | WSL2 |
-| HTTP Client | Invoke-WebRequest | curl |
-| Tests | 13 | 11 |
-| Pass Rate | 100% (13/13) | 100% (11/11) |
+| Aspecto          | PowerShell                     | Bash                           |
+| ---------------- | ------------------------------ | ------------------------------ |
+| Entorno          | Windows nativo                 | WSL2                           |
+| HTTP Client      | Invoke-WebRequest              | curl                           |
+| Tests            | 13                             | 11                             |
+| Pass Rate        | 100% (13/13)                   | 100% (11/11)                   |
 | Reproducibilidad | Múltiples ejecuciones exitosas | Múltiples ejecuciones exitosas |
-| Manejo de IP | localhost:8080 | Dinámico (172.28.224.1:8080) |
-| Manejo de Token | String extraction con grep | String extraction con grep |
+| Manejo de IP     | localhost:8080                 | Dinámico (172.28.224.1:8080)   |
+| Manejo de Token  | String extraction con grep     | String extraction con grep     |
 
 #### Validaciones Completadas
 
@@ -2523,3 +2697,152 @@ La API está lista para:
 - **Autenticación:** JWT tokens generados y validados exitosamente
 
 #### Archivos Modificados
+
+---
+
+### 2025-12-02 - Integración de Warranty en TicketService
+
+#### Resumen
+
+Se implementó la lógica para crear automáticamente registros de `Warranty` cuando se generan ventas (Sales) dentro de un ticket. La funcionalidad permite opcionalmente incluir garantía a nivel de item con fecha de expiración configurada.
+
+#### Cambios Realizados
+
+**Archivos Creados (1):**
+
+1. `src/main/kotlin/api/multipartes/dev/warranty/repository/WarrantyRepository.kt`
+   - Interfaz repositorio para entidad `Warranty`
+   - Métodos: `findBySaleId()`, `findByStatus()`, `findByExpirationDateBefore()`, `findByExpirationDateAfter()`
+
+**Archivos Modificados (2):**
+
+1. `src/main/kotlin/api/multipartes/dev/ticket/dto/TicketItem.kt`
+
+   - Agregados campos: `hasWarranty: Boolean = false`, `warrantyExpirationDate: LocalDate? = null`
+   - Modificados: `partId` e `partName` ahora son opcionales
+   - Agregado import: `java.time.LocalDate`
+
+2. `src/main/kotlin/api/multipartes/dev/ticket/service/TicketService.kt`
+   - Inyectada dependencia: `WarrantyRepository`
+   - Agregados imports: `WarrantyStatus`, `Warranty`
+   - Implementada lógica de creación de warranty:
+     - Se crea warranty solo si `item.hasWarranty == true` Y `item.warrantyExpirationDate != null`
+     - Status inicial: `WarrantyStatus.ACTIVE`
+     - Operación transaccional (@Transactional): rollback en caso de fallo
+   - Refactorización: cambio de variable `it` a `item` para mejor legibilidad
+   - Mejora de validaciones: mensajes más descriptivos
+
+**Documentación Creada (1):**
+
+1. `CHANGELOG_WARRANTY_INTEGRATION.md`
+   - Descripción detallada de cambios
+   - Flujo de negocio implementado
+   - Ejemplo de request
+   - Validaciones
+   - Próximos pasos recomendados
+
+#### Flujo de Negocio
+
+```
+TicketRequest.items[] → [TicketItem con hasWarranty + warrantyExpirationDate]
+                              ↓
+                    Sale creado y guardado
+                              ↓
+                  if (hasWarranty && expirationDate)
+                              ↓
+                  Warranty(sale, ACTIVE, expirationDate)
+                              ↓
+                    Garantía registrada en BD
+```
+
+#### Ejemplo de Uso
+
+**Request:**
+
+```json
+{
+  "sellerId": 1,
+  "paymentMethod": "CASH",
+  "total": 1500.5,
+  "items": [
+    {
+      "partId": 5,
+      "quantity": 2,
+      "price": 450.0,
+      "hasWarranty": true,
+      "warrantyExpirationDate": "2025-12-02"
+    }
+  ]
+}
+```
+
+**Resultado en BD:**
+
+- Ticket creado con folio UUID
+- Sale vinculada a ticket y partId=5
+- Warranty creado con status=ACTIVE y expiration_date='2025-12-02'
+
+#### Relaciones en BD
+
+```
+Ticket (1) ──── (N) Sale (1) ──── (1) Warranty
+   folio              id              id
+                  ticket_folio     sale_id (FK)
+                                   status
+                                   expiration_date
+                                   created_at
+```
+
+#### Validaciones Implementadas
+
+- ✅ Usuario existe (valida `sellerId`)
+- ✅ Método de pago es válido (enum)
+- ✅ Cada item tiene `partId` O `partName`
+- ✅ Warranty solo se crea si ambas condiciones son met
+- ✅ Transacción ACID: todo o nada
+
+#### Próximas Tareas Sugeridas
+
+1. Crear `WarrantyController.kt` con endpoints de consulta/modificación de warranties
+2. Implementar `WarrantyClaimService` para gestionar reclamaciones
+3. Agregar endpoint para listar warranties próximas a vencer
+4. Crear notificaciones automáticas (email/sms) para warranty expirations
+5. Agregar tests unitarios e integración en `WarrantyServiceTest.kt`
+6. Documentar en Swagger/OpenAPI los nuevos parámetros de warranty en TicketRequest
+
+### 2025-12-02 - Corrección de Roles en JWT
+
+#### Resumen
+
+- Se corrigió la obtención del rol durante login y validación de JWT para evitar tokens rechazados después del refactor de repositorios de usuario.
+
+#### Cambios Realizados
+
+- **UserRepository.kt** (`src/main/kotlin/api/multipartes/dev/user/repository/UserRepository.kt`)
+  - Ajustado `findByUsername` para que retorne `User?`, reflejando el comportamiento real del repositorio.
+- **AuthService.kt** (`src/main/kotlin/api/multipartes/dev/endPoints/auth/AuthService.kt`)
+  - Uso del repositorio actualizado.
+  - Validación explícita de que el usuario tenga rol antes de generar el token.
+  - Corrección del `LoginResponse` para devolver el nombre del rol y generación de token usando el rol validado.
+- **JwtFilter.kt** (`src/main/kotlin/api/multipartes/dev/config/JwtFilter.kt`)
+  - Al revalidar el rol desde la base de datos se obtiene el nombre del enum y se maneja el caso de usuarios sin rol, devolviendo 401 coherente.
+- **JwtService.kt** (`src/main/kotlin/api/multipartes/dev/JwtService.kt`)
+  - Firmado y validación usando `Keys.hmacShaKeyFor` para garantizar compatibilidad entre generación y parsing del token.
+
+### 2025-12-02 - Logs de depuración de JWT
+
+- **AuthService.kt**
+  - Agregado `println` al finalizar el login para registrar usuario, rol y token parcial.
+- **JwtFilter.kt**
+  - Agregados `println` para trazabilidad cuando se acepta un token o se rechaza por firma, expiración o falta de rol.
+
+### 2025-12-02 - Corrección de Serialización en Tickets
+
+- **allDTO.kt**
+  - `SaleResponse` ahora expone `partId` y `partName` opcionales.
+  - Nuevo `WarrantyResponse` para exponer datos planos de garantías.
+- **ticket/dto/TicketResponse.kt**
+  - `GetTicketResponse` retorna `List<SaleResponse>` y `List<WarrantyResponse>` en lugar de entidades JPA.
+- **TicketService.kt**
+  - Se centralizó el mapeo a DTOs y se agregaron helpers para convertir `Sale` y `Warranty` a respuestas simples, evitando proxies `ByteBuddy` en la respuesta de `/api/tickets`.
+

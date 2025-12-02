@@ -1,5 +1,6 @@
 package api.multipartes.dev.dtos
 
+import api.multipartes.dev.models.Warranty
 import jakarta.validation.constraints.*
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -57,7 +58,8 @@ data class TicketResponse(
     val paymentMethod: String,
     val items: Byte,
     val date: LocalDateTime,
-    val sales: List<SaleResponse>
+    val sales: List<SaleResponse>,
+    val warranties: List<Warranty>
 )
 
 data class SaleResponse(
