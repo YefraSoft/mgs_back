@@ -9,6 +9,7 @@ Esta API proporciona servicios backend para la gestión completa de un negocio d
 ## 🏗️ Arquitectura
 
 ### Stack Tecnológico
+
 - **Lenguaje:** Kotlin 1.9.25
 - **Framework:** Spring Boot 3.4.5
 - **Base de Datos:** MySQL 8
@@ -17,6 +18,7 @@ Esta API proporciona servicios backend para la gestión completa de un negocio d
 - **Java:** Versión 21
 
 ### Características Principales
+
 - 🔐 Autenticación JWT con roles
 - 📦 Gestión completa de inventario
 - 💰 Sistema de ventas y tickets
@@ -40,6 +42,7 @@ El sistema utiliza una base de datos MySQL con 12 tablas principales:
 ## 🚀 Instalación y Configuración
 
 ### Prerrequisitos
+
 - Java 21+
 - MySQL 8+
 - Maven 3.6+
@@ -47,12 +50,14 @@ El sistema utiliza una base de datos MySQL con 12 tablas principales:
 ### Configuración
 
 1. **Clonar el repositorio**
+
 ```bash
 git clone <repository-url>
 cd mgs_back
 ```
 
 2. **Configurar la base de datos**
+
 ```bash
 # Crear la base de datos MySQL
 mysql -u root -p
@@ -60,6 +65,7 @@ CREATE DATABASE mpgv1;
 ```
 
 3. **Configurar variables de entorno**
+
 ```yaml
 # application-dev.yml
 spring:
@@ -70,6 +76,7 @@ spring:
 ```
 
 4. **Ejecutar la aplicación**
+
 ```bash
 ./mvnw spring-boot:run
 ```
@@ -77,12 +84,14 @@ spring:
 ## 📚 Endpoints Principales
 
 ### Autenticación
+
 ```
 POST /api/auth/login     - Iniciar sesión
 POST /api/auth/register  - Registrar usuario
 ```
 
 ### Piezas
+
 ```
 GET    /api/parts        - Listar todas las piezas
 GET    /api/parts/{id}   - Obtener pieza por ID
@@ -92,6 +101,7 @@ DELETE /api/parts/{id}   - Eliminar pieza
 ```
 
 ### Ventas
+
 ```
 GET    /api/sales                    - Listar todas las ventas
 GET    /api/sales/{id}              - Obtener venta por ID
@@ -156,6 +166,7 @@ src/main/kotlin/api/multipartes/dev/
 ## 📝 Documentación de la API
 
 La documentación completa de la API está disponible en el archivo `AGENTS.md` que incluye:
+
 - Esquema completo de la base de datos
 - Descripción detallada de cada tabla
 - Relaciones entre entidades
