@@ -3,6 +3,8 @@ package api.multipartes.dev.ticket.controller
 import api.multipartes.dev.ticket.dto.GetTicketResponse
 import api.multipartes.dev.ticket.dto.MakeResponse
 import api.multipartes.dev.ticket.dto.TicketRequest
+import api.multipartes.dev.ticket.dto.UpdateTicketRequest
+
 import api.multipartes.dev.ticket.service.TicketService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -24,6 +26,28 @@ class TicketController(
             ResponseEntity.badRequest().build()
         } catch (e: IllegalStateException) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+        }
+    }
+
+    @PutMapping("/{folio}")
+    fun updateTicket(
+        @PathVariable folio: String,
+        @RequestBody request: UpdateTicketRequest
+    ): ResponseEntity<GetTicketResponse> {
+        return try {
+            ResponseEntity.ok(_service.update(folio, request))
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
+        }
+    }
+
+    @DeleteMapping("/{folio}")
+    fun deleteTicket(@PathVariable folio: String): ResponseEntity<Void> {
+        return try {
+            _service.delete(folio)
+            ResponseEntity.noContent().build()
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.notFound().build()
         }
     }
 

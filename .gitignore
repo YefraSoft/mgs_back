@@ -43,3 +43,5 @@ src/main/resources/application*.properties.disable
 !src/main/resources/application.yml
 
 ENDPOINT_TEST.md
+
+___+app

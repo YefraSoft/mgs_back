@@ -544,6 +544,12 @@ CREATE TABLE expenses (
 
 ## LOGs
 
+### 2025-12-02 - CRUD completo para tickets
+
+- Se documentó y expuso el CRUD de tickets en servicio y controlador (`TicketService.kt`, `TicketController.kt`).
+- Se añadieron DTOs faltantes para actualización parcial y validaciones (`TicketRequest.kt`).
+- Se actualizó el repositorio de ventas para soportar borrado por folio (`SalesRepository.kt`).
+
 ### 2025-10-12 - Alineación de Entidades con la Base de Datos
 
 #### Resumen
@@ -1247,6 +1253,40 @@ Se han creado endpoints completos (CRUD) para administrar marcas de vehículos (
 ```
 
 **Métodos de Pago Válidos:** `CASH`, `CREDIT_CARD`, `DEBIT_CARD`, `CASH_ON_DELIVERY`, `OTHER`
+
+#### PUT /api/tickets/{folio}
+
+**Descripción:** Actualizar un ticket existente (permite cambios parciales)
+
+**Request:**
+
+```json
+{
+  "sellerId": 2,
+  "paymentMethod": "DEBIT_CARD",
+  "total": 1800.75,
+  "items": [
+    {
+      "partId": 10,
+      "quantity": 1,
+      "price": 900.50
+    },
+    {
+      "partName": "Par de amortiguadores",
+      "quantity": 1,
+      "price": 900.25
+    }
+  ]
+}
+```
+
+**Response:** Igual que GET /api/tickets/{folio}
+
+#### DELETE /api/tickets/{folio}
+
+**Descripción:** Eliminar un ticket y sus ventas asociadas
+
+**Response:** `204 No Content` si la eliminación fue exitosa, `404` si el folio no existe
 
 #### GET /api/tickets
 

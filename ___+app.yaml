@@ -1,0 +1,17 @@
+runtime: java17
+instance_class: F2
+
+entrypoint: java -jar target/dev-0.0.1-SNAPSHOT.jar
+
+# Variables de entorno
+env_variables:
+  SPRING_PROFILES_ACTIVE: "prod"
+  DB_URL: jdbc:mysql://google/mpgv2?cloudSqlInstance=multipartesgarcia:us-central1:mpgbd1&socketFactory=com.google.cloud.sql.mysql.SocketFactory&useSSL=false
+  DB_USER: spring
+  DB_PASSWORD: springboot1416
+  JWT_SECRET: 8Mdg248xR2P9rJ7T8aCGhn40kPvf1NtYquZ+n1clrHs=
+  CORS_ALLOWED_ORIGIN: "*"
+
+vpc_access_connector:
+  name: projects/multipartesgarcia/locations/us-central1/connectors/default
+  egress_setting: all-traffic

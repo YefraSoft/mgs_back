@@ -8,3 +8,10 @@ data class TicketRequest(
     val total: BigDecimal,
     val items: List<TicketItem>
 )
+
+data class UpdateTicketRequest(
+    val sellerId: Int? = null,
+    val paymentMethod: String? = null,
+    val total: BigDecimal? = null,
+    val items: List<TicketItem>? = null
+)
