@@ -520,3 +520,6 @@ CREATE TABLE expenses (
     INDEX idx_category (category),
     INDEX idx_created_by (created_by)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+ALTER TABLE tickets
+   ADD COLUMN discount DECIMAL(10, 2);
