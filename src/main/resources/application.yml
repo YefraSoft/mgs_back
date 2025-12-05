@@ -12,3 +12,4 @@ cache:
     - tickets
     - customers
     - customer-issues
+    - sales-trend
