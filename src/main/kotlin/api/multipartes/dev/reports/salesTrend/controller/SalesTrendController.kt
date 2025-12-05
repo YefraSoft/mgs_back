@@ -14,10 +14,6 @@ class SalesTrendController(private val _service: SalesTrendService) {
     @GetMapping("/monthly")
     fun getMonthlySalesTrend(): ResponseEntity<List<SalesTrend>> {
         val result = _service.getMonthlySalesTrend()
-        return if (result.isNotEmpty()) {
-            ResponseEntity.ok(result)
-        } else {
-            ResponseEntity.notFound().build()
-        }
+        return ResponseEntity.ok(result)
     }
 }

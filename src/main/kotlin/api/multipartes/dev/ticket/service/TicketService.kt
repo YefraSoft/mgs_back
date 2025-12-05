@@ -29,7 +29,7 @@ class TicketService(
 ) {
 
     @Transactional
-    @CacheEvict(value = ["tickets"], allEntries = true)
+    @CacheEvict(value = ["tickets","sales-trend"], allEntries = true)
     fun make(request: TicketRequest): MakeResponse {
         val ticket = buildTicketFromRequest(request)
         val savedTicket = saveTicketWithRelations(ticket, request.items)
@@ -40,7 +40,7 @@ class TicketService(
     }
 
     @Transactional
-    @CacheEvict(value = ["tickets"], allEntries = true)
+    @CacheEvict(value = ["tickets","sales-trend"], allEntries = true)
     fun update(folio: String, request: UpdateTicketRequest): GetTicketResponse {
         val existingTicket = _repo.findById(folio)
             .orElseThrow { IllegalArgumentException("Ticket with folio $folio not found") }
@@ -69,7 +69,7 @@ class TicketService(
     }
 
     @Transactional
-    @CacheEvict(value = ["tickets"], allEntries = true)
+    @CacheEvict(value = ["tickets","sales-trend"], allEntries = true)
     fun delete(folio: String) {
         val ticket = _repo.findById(folio)
             .orElseThrow { IllegalArgumentException("Ticket with folio $folio not found") }

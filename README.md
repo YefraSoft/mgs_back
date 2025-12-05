@@ -111,6 +111,13 @@ DELETE /api/sales/{id}              - Eliminar venta
 GET    /api/sales/search/by-date    - Buscar ventas por fecha
 ```
 
+### Logs de Aplicación (solo ADMIN)
+
+```
+GET  /api/app-logs         - Listar eventos con filtros opcionales (level, userId, loginLogId, path, search, rango de fechas, paginación)
+GET  /api/app-logs/{id}    - Obtener un log específico
+```
+
 ## 🔒 Seguridad
 
 - **JWT Tokens:** Autenticación stateless
