@@ -1,14 +1,15 @@
-package api.multipartes.dev.endPoints.parts
+package api.multipartes.dev.parts.service
 
 import api.multipartes.dev.dtos.PartResponse
 import api.multipartes.dev.models.Part
+import api.multipartes.dev.parts.repository.PartsRepository
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 @Service
-class PartsService(private val repo: PartsRepo) {
+class PartsService(private val repo: PartsRepository) {
 
     @Cacheable("parts")
     fun findAll(): List<PartResponse> {

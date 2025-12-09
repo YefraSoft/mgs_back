@@ -1,6 +1,7 @@
-package api.multipartes.dev.endPoints.parts
+package api.multipartes.dev.parts.controller
 
 import api.multipartes.dev.dtos.PartResponse
+import api.multipartes.dev.parts.service.PartsService
 import api.multipartes.dev.models.Part
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
