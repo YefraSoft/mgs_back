@@ -6,12 +6,12 @@ import api.multipartes.dev.endPoints.customers.CustomerRepository
 import api.multipartes.dev.endPoints.customers.CustomerIssueRepository
 import api.multipartes.dev.endPoints.models.ModelRepository
 import api.multipartes.dev.endPoints.models.ModelService
-import api.multipartes.dev.endPoints.parts.PartsRepo
 import api.multipartes.dev.sales.repository.SalesRepository
 import api.multipartes.dev.ticket.repository.TicketRepository
 import api.multipartes.dev.config.JwtSecretValidator
 import api.multipartes.dev.config.RateLimitService
 import api.multipartes.dev.config.GlobalExceptionHandler
+import api.multipartes.dev.parts.repository.PartsRepository
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -42,7 +42,7 @@ class DevApplicationTests {
     private lateinit var customerIssueRepository: CustomerIssueRepository
 
     @Autowired
-    private lateinit var partsRepository: PartsRepo
+    private lateinit var partsRepository: PartsRepository
 
     @Autowired
     private lateinit var salesRepository: SalesRepository
