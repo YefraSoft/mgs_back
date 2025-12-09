@@ -15,11 +15,22 @@ class CorsConfig {
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf(allowedOrigin);
+        
+        // Permitir todos los orígenes temporalmente
+        // Usar allowedOriginPatterns en lugar de allowedOrigins para permitir * con credentials
+        configuration.allowedOriginPatterns = listOf("*")
+        
+        // Alternativa: Si prefieres usar la variable de entorno cuando esté definida:
+        // val origins = if (allowedOrigin.isNotBlank() && allowedOrigin != "http://localhost:3000") {
+        //     listOf(allowedOrigin)
+        // } else {
+        //     listOf("*")
+        // }
+        // configuration.allowedOriginPatterns = origins
 
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
 
-        configuration.allowedHeaders = listOf("Authorization", "Content-Type", "Accept")
+        configuration.allowedHeaders = listOf("Authorization", "Content-Type", "Accept", "X-Requested-With")
 
         configuration.exposedHeaders = listOf("Authorization")
 
