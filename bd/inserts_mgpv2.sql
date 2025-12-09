@@ -405,6 +405,38 @@ LEFT JOIN parts p ON s.part_id = p.id
 WHERE w.status = 'ACTIVE'
 ORDER BY w.expiration_date;
 
+INSERT INTO warranty (sale_id, status, expiration_date) VALUES
+(1, 'ACTIVE', '2025-12-31'),
+(2, 'ACTIVE', '2025-11-30'),
+(3, 'ACTIVE', '2025-10-15'),
+(4, 'EXPIRED', '2024-06-30'),
+(5, 'EXPIRED', '2024-08-15'),
+(6, 'PENDING', '2026-01-20'),
+(7, 'PENDING', '2025-12-10'),
+(8, 'REJECTED', '2025-09-05'),
+(9, 'REJECTED', '2025-07-22'),
+(10, 'ACTIVE', '2026-03-15');
+
+INSERT INTO warranty_claim (warranty_id, image_url, description, claim_type) VALUES
+(1, 'https://example.com/img1.jpg', 'Producto con defecto de fábrica', 'EXCHANGE'),
+(1, 'https://example.com/img2.jpg', 'Rayón en la pantalla', 'EXCHANGE'),
+(2, 'https://example.com/img3.jpg', 'No enciende correctamente', 'RETURN'),
+(3, 'https://example.com/img4.jpg', 'Batería no carga', 'EXCHANGE'),
+(10, 'https://example.com/img5.jpg', 'Color diferente al pedido', 'EXCHANGE'),
+(10, 'https://example.com/img6.jpg', 'Empaque dañado', 'EXCHANGE'),
+(10, 'https://example.com/img7.jpg', 'Tamaño incorrecto', 'RETURN'),
+(4, 'https://example.com/img8.jpg', 'Desgaste por uso', 'EXCHANGE'),
+(4, 'https://example.com/img9.jpg', 'Pieza rota', 'EXCHANGE'),
+(4, 'https://example.com/img10.jpg', 'Material defectuoso', 'EXCHANGE'),
+(5, 'https://example.com/img11.jpg', 'No funciona', 'RETURN'),
+(5, 'https://example.com/img12.jpg', 'Oxidación', 'RETURN'),
+(5, 'https://example.com/img13.jpg', 'Manchas permanentes', 'RETURN'),
+(5, 'https://example.com/img14.jpg', 'Olor extraño', 'RETURN'),
+(5, 'https://example.com/img15.jpg', 'Textura áspera', 'RETURN'),
+(6, 'https://example.com/img16.jpg', 'Revisión pendiente', 'RETURN'),
+(8, 'https://example.com/img17.jpg', 'Daño por mal uso', 'EXCHANGE'),
+(9, 'https://example.com/img18.jpg', 'Fuera de plazo', 'EXCHANGE');
+
 -- ===========================================================
 -- FIN DEL SCRIPT
 -- ===========================================================
