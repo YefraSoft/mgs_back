@@ -1,4 +1,4 @@
-package api.multipartes.dev.reports.salesTrend.dto
+package api.multipartes.dev.ticket.dto
 
 import java.math.BigDecimal
 

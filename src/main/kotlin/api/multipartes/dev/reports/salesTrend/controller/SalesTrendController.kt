@@ -1,6 +1,6 @@
 package api.multipartes.dev.reports.salesTrend.controller
 
-import api.multipartes.dev.reports.salesTrend.dto.SalesTrend
+import api.multipartes.dev.ticket.dto.SalesTrend
 import api.multipartes.dev.reports.salesTrend.service.SalesTrendService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,6 +14,9 @@ class SalesTrendController(private val _service: SalesTrendService) {
     @GetMapping("/monthly")
     fun getMonthlySalesTrend(): ResponseEntity<List<SalesTrend>> {
         val result = _service.getMonthlySalesTrend()
-        return ResponseEntity.ok(result)
+        return if (result.isEmpty())
+            ResponseEntity.noContent().build()
+        else
+            ResponseEntity.ok(result)
     }
 }
